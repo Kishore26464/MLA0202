@@ -1,0 +1,69 @@
+import math
+
+data = [
+    [150, 50, "Underweight"],
+    [155, 52, "Underweight"],
+    [160, 55, "Normal"],
+    [165, 60, "Normal"],
+    [170, 65, "Normal"],
+    [175, 80, "Overweight"],
+    [180, 85, "Overweight"],
+    [185, 90, "Overweight"]
+]
+
+new_sample = [168, 62]
+
+k = 3
+
+
+def euclidean_distance(point1, point2):
+    distance = 0
+
+    for i in range(len(point1)):
+        distance += (point1[i] - point2[i]) ** 2
+
+    return math.sqrt(distance)
+
+
+# Calculate distances
+distances = []
+
+for row in data:
+    features = row[:-1]
+    label = row[-1]
+
+    distance = euclidean_distance(features, new_sample)
+
+    distances.append((distance, label))
+
+
+# Sort according to distance
+distances.sort(key=lambda x: x[0])
+
+
+# Select K nearest neighbours
+nearest_neighbours = distances[:k]
+
+
+print("K Nearest Neighbours:")
+for distance, label in nearest_neighbours:
+    print("Distance:", round(distance, 2), "Class:", label)
+
+
+# Voting
+votes = {}
+
+for distance, label in nearest_neighbours:
+    if label not in votes:
+        votes[label] = 0
+
+    votes[label] += 1
+
+
+# Find class with maximum votes
+prediction = max(votes, key=votes.get)
+
+
+print("\nNew Sample:", new_sample)
+print("K =", k)
+print("Predicted Class:", prediction)
