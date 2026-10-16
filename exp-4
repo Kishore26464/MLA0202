@@ -1,0 +1,114 @@
+import numpy as np
+
+X = np.array([
+    [0, 0],
+    [0, 1],
+    [1, 0],
+    [1, 1]
+])
+
+Y = np.array([
+    [0],
+    [1],
+    [1],
+    [0]
+])
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
+# Derivative of sigmoid
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+
+np.random.seed(42)
+
+input_neurons = 2
+hidden_neurons = 4
+output_neurons = 1
+
+# Random weights
+W1 = np.random.uniform(-1, 1, (input_neurons, hidden_neurons))
+W2 = np.random.uniform(-1, 1, (hidden_neurons, output_neurons))
+
+# Biases
+b1 = np.zeros((1, hidden_neurons))
+b2 = np.zeros((1, output_neurons))
+
+learning_rate = 0.5
+epochs = 10000
+
+
+# -------------------------------
+# 4. Backpropagation Training
+# -------------------------------
+
+for epoch in range(epochs):
+
+    # -------- Forward Propagation --------
+
+    hidden_input = np.dot(X, W1) + b1
+    hidden_output = sigmoid(hidden_input)
+
+    final_input = np.dot(hidden_output, W2) + b2
+    output = sigmoid(final_input)
+
+
+    # -------- Calculate Error --------
+
+    error = Y - output
+
+
+    # -------- Backpropagation --------
+
+    # Output layer delta
+    output_delta = error * sigmoid_derivative(output)
+
+    # Hidden layer error
+    hidden_error = np.dot(output_delta, W2.T)
+
+    # Hidden layer delta
+    hidden_delta = hidden_error * sigmoid_derivative(hidden_output)
+
+
+    # -------- Update Weights --------
+
+    W2 += learning_rate * np.dot(hidden_output.T, output_delta)
+    b2 += learning_rate * np.sum(output_delta, axis=0, keepdims=True)
+
+    W1 += learning_rate * np.dot(X.T, hidden_delta)
+    b1 += learning_rate * np.sum(hidden_delta, axis=0, keepdims=True)
+
+
+    # Print error occasionally
+    if epoch % 1000 == 0:
+        mse = np.mean(error ** 2)
+        print("Epoch:", epoch, "MSE:", mse)
+
+
+# -------------------------------
+# 5. Test the Neural Network
+# -------------------------------
+
+print("\nFinal Predictions:")
+
+for i in range(len(X)):
+
+    hidden_input = np.dot(X[i:i+1], W1) + b1
+    hidden_output = sigmoid(hidden_input)
+
+    final_input = np.dot(hidden_output, W2) + b2
+    prediction = sigmoid(final_input)
+
+    print(
+        "Input:",
+        X[i],
+        "Target:",
+        Y[i][0],
+        "Predicted:",
+        round(prediction[0][0], 4),
+        "Class:",
+        int(prediction[0][0] >= 0.5)
+    )
