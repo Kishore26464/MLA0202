@@ -1,0 +1,82 @@
+EXP-1
+
+# FIND-S Algorithm
+
+data = [
+    ['Sunny', 'Warm', 'Normal', 'Strong', 'Warm', 'Same', 'Yes'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Warm', 'Same', 'Yes'],
+    ['Rainy', 'Cold', 'High', 'Strong', 'Warm', 'Change', 'No'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Cool', 'Change', 'Yes']
+]
+
+# Initialize the most specific hypothesis
+h = ['0'] * (len(data[0]) - 1)
+
+# Process training examples
+for row in data:
+    if row[-1] == 'Yes':
+        for i in range(len(h)):
+            if h[i] == '0':
+                h[i] = row[i]
+            elif h[i] != row[i]:
+                h[i] = '?'
+
+print("Training Data:")
+for row in data:
+    print(row)
+
+print("\nFinal Hypothesis:", h)
+
+EXP-2
+
+import csv
+from io import StringIO
+
+csv_data = """Sky,Temperature,Humidity,Wind,Water,Forecast,EnjoySport
+Sunny,Warm,Normal,Strong,Warm,Same,Yes
+Sunny,Warm,High,Strong,Warm,Same,Yes
+Rainy,Cold,High,Strong,Warm,Change,No
+Sunny,Warm,High,Strong,Cool,Change,Yes"""
+
+data = list(csv.reader(StringIO(csv_data)))
+examples = data[1:]
+n = len(data[0]) - 1
+
+S = ['0'] * n
+G = [['?' for _ in range(n)]]
+
+def covers(h, x):
+    return all(a == '?' or a == b for a, b in zip(h, x))
+
+for row in examples:
+    x, label = row[:-1], row[-1]
+
+    if label == "Yes":
+        for i in range(n):
+            if S[i] == '0':
+                S[i] = x[i]
+            elif S[i] != x[i]:
+                S[i] = '?'
+
+        G = [g for g in G if covers(g, x)]
+
+    else:
+        new_G = []
+        for g in G:
+            if covers(g, x):
+                for i in range(n):
+                    if g[i] == '?' and S[i] not in ('0', '?'):
+                        if S[i] != x[i]:
+                            h = g.copy()
+                            h[i] = S[i]
+                            new_G.append(h)
+            else:
+                new_G.append(g)
+        G = new_G
+
+print("Specific Boundary (S):")
+print(S)
+
+print("\nGeneral Boundary (G):")
+for h in G:
+    print(h)
