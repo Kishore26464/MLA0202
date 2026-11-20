@@ -1,0 +1,57 @@
+
+# Future Sales Prediction using Linear Regression
+
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+
+# Historical sales data
+data = {
+    'Month': list(range(1, 13)),
+    'Sales': [100, 120, 130, 150, 170, 180,
+              200, 210, 230, 250, 270, 300]
+}
+
+df = pd.DataFrame(data)
+
+# Create previous month feature
+df['Previous_Sales'] = df['Sales'].shift(1)
+
+# Remove first row
+df = df.dropna()
+
+# Input and output
+X = df[['Month', 'Previous_Sales']]
+y = df['Sales']
+
+# Train model
+model = LinearRegression()
+model.fit(X, y)
+
+# Predict future sales for next month
+next_month = 13
+previous_sales = df['Sales'].iloc[-1]
+
+future_sales = model.predict(
+    pd.DataFrame(
+        [[next_month, previous_sales]],
+        columns=X.columns
+    )
+)
+
+print("Last Month Sales:", previous_sales)
+print("Predicted Sales for Month 13:",
+      round(future_sales[0], 2))
+
+# Predict next 3 months
+for month in range(14, 16):
+    previous_sales = future_sales[0]
+
+    future_sales = model.predict(
+        pd.DataFrame(
+            [[month, previous_sales]],
+            columns=X.columns
+        )
+    )
+
+    print("Predicted Sales for Month",
+          month, ":", round(future_sales[0], 2))
